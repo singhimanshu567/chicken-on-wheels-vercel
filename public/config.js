@@ -7,4 +7,4 @@ export const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_lKgFDshYS5nRAA8gKSwUgA_p
 
 export const SUPABASE_CONFIGURED =
   SUPABASE_URL.startsWith("https://") &&
-  SUPABASE_PUBLISHABLE_KEY.length > 2
+  SUPABASE_PUBLISHABLE_KEY.length > 20;
