@@ -1,0 +1,650 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Chicken on Wheels</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<header class="site-header" id="site-header">
+  <div class="wrap">
+    <nav class="site-nav" aria-label="Primary">
+      <a class="brand" href="#top" aria-label="Chicken on Wheels home">
+        <span class="brand-mark" aria-hidden="true"></span>
+        Chicken on Wheels
+      </a>
+      <button class="btn btn--ghost nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="site-links">Menu</button>
+      <div class="site-nav-links" id="site-links">
+        <a href="#menu">Menu</a>
+        <a href="#truck">Our Truck</a>
+        <a href="#book">Book</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="#faq">FAQ</a>
+      </div>
+      <div class="nav-actions">
+        <button class="btn btn--ghost" id="cart-button" type="button" aria-label="Open cart">
+          Cart <span class="chip" id="cart-count">0</span>
+        </button>
+        <div id="auth-area">
+          <a class="btn btn--gold" href="login.html">Login</a>
+        </div>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <div class="eyebrow">Rolling since 2019</div>
+        <h1>Fried chicken that <span>chases you down.</span></h1>
+        <p class="lede">Buttermilk-brined, double-fried, and handed out the window of a truck that moves with the city. No dining room, no wait staff, just hot chicken, fast.</p>
+        <div class="cta-row">
+          <a class="btn btn--gold" href="#book">Book the Truck</a>
+          <a class="btn btn--ghost" href="#menu">See the Menu</a>
+          <button class="btn btn--ghost" id="open-cart-hero" type="button">View Cart</button>
+        </div>
+        <div class="stats-row" aria-label="Quick stats">
+          <div class="stat-card"><strong>6</strong><span>Neighborhoods weekly</span></div>
+          <div class="stat-card"><strong>12</strong><span>Minute average wait</span></div>
+          <div class="stat-card"><strong>4.8</strong><span>Rating, 900+ orders</span></div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div id="special-card"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-section" id="menu">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">Menu</div>
+          <h2 class="section-title">What's on the <span>truck</span></h2>
+        </div>
+        <p class="section-copy">Every item can be opened, inspected, and added directly to your order without losing the food-truck feel.</p>
+      </div>
+      <div id="menu-list"></div>
+    </div>
+  </section>
+
+  <section class="page-section" id="truck">
+    <div class="wrap split-grid">
+      <div class="about-panel">
+        <div class="eyebrow">Our Truck</div>
+        <h2 class="section-title">Built for neighborhoods, events, and long lines</h2>
+        <p class="section-copy">Chicken on Wheels started as one converted delivery van and a family recipe. We still cook everything to order and publish the truck schedule as it changes.</p>
+        <div class="wheel-graphic" aria-hidden="true"></div>
+      </div>
+      <div class="feature-grid">
+        <div id="truck-status"></div>
+        <div class="panel" id="truck-map-panel">
+          <div class="section-head section-head--compact">
+            <div>
+              <div class="eyebrow">Map</div>
+              <h3>Truck location</h3>
+            </div>
+            <span class="chip">Live data from Supabase</span>
+          </div>
+          <div id="truck-map" class="loading-overlay">
+            <div class="skeleton-block" style="width:100%">
+              <div class="skeleton-line skeleton-line--wide"></div>
+              <div class="skeleton-line"></div>
+              <div class="skeleton-line skeleton-line--short"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-section" id="book">
+    <div class="wrap book-grid split-grid">
+      <div>
+        <div class="eyebrow">Book the truck</div>
+        <h2 class="section-title">Want us at your <span>event</span>?</h2>
+        <p class="section-copy">Send your date, time, guest count, location, and details. Your requests stay linked to your account and appear in your dashboard with a full booking status timeline.</p>
+        <div class="booking-steps">
+          <div class="stat-card"><strong>1</strong><span>Login or create an account</span></div>
+          <div class="stat-card"><strong>2</strong><span>Submit the request</span></div>
+          <div class="stat-card"><strong>3</strong><span>Track review status in your dashboard</span></div>
+        </div>
+      </div>
+      <div class="form-card" id="booking-card"></div>
+    </div>
+  </section>
+
+  <section class="page-section" id="faq">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">FAQ</div>
+          <h2 class="section-title">Questions, answered</h2>
+        </div>
+        <p class="section-copy">Expandable answers that fit the same visual identity and stay easy to scan on mobile.</p>
+      </div>
+      <div class="accordion" id="faq-list"></div>
+    </div>
+  </section>
+
+  <section class="page-section">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">Reviews</div>
+          <h2 class="section-title">What customers are saying</h2>
+        </div>
+        <p class="section-copy">This section uses Supabase review data when available. If there are no rows yet, it shows an honest empty state.</p>
+      </div>
+      <div id="reviews-list"></div>
+    </div>
+  </section>
+</main>
+
+<footer class="page-footer">
+  <div class="wrap footer-grid">
+    <div>
+      <a class="brand" href="#top">
+        <span class="brand-mark" aria-hidden="true"></span>
+        Chicken on Wheels
+      </a>
+      <p class="footer-meta">Built for hungry neighborhoods, private events, and account-based ordering with Supabase.</p>
+    </div>
+    <nav class="footer-links" aria-label="Footer">
+      <a href="#menu">Menu</a>
+      <a href="#truck">Our Truck</a>
+      <a href="#book">Book</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <div class="footer-links" id="footer-contact">
+      <span class="muted">Contact</span>
+      <span class="muted">No social links are configured yet.</span>
+      <span class="muted">Use the booking form or dashboard notes to reach the team.</span>
+      <span class="muted">© 2026 Chicken on Wheels</span>
+    </div>
+  </div>
+</footer>
+
+<div class="modal" id="item-modal" hidden aria-hidden="true">
+  <div class="modal-backdrop" data-close-panel></div>
+  <div class="modal-panel">
+    <div class="modal-header">
+      <h2 class="modal-title" id="item-modal-title">Item</h2>
+      <button class="btn btn--ghost btn--sm" type="button" data-close-panel>Close</button>
+    </div>
+    <div id="item-modal-body"></div>
+  </div>
+</div>
+
+<div class="modal" id="checkout-modal" hidden aria-hidden="true">
+  <div class="modal-backdrop" data-close-panel></div>
+  <div class="modal-panel">
+    <div class="modal-header">
+      <h2 class="modal-title">Checkout</h2>
+      <button class="btn btn--ghost btn--sm" type="button" data-close-panel>Close</button>
+    </div>
+    <div id="checkout-modal-body"></div>
+  </div>
+</div>
+
+<aside class="drawer" id="cart-drawer" hidden aria-hidden="true">
+  <div class="drawer-backdrop" data-close-panel></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div>
+        <div class="eyebrow">Order</div>
+        <h2 class="section-title">Cart</h2>
+      </div>
+      <button class="btn btn--ghost btn--sm" type="button" data-close-panel>Close</button>
+    </div>
+    <div id="cart-drawer-body" class="cart-panel"></div>
+    <div class="cart-actions">
+      <button class="btn btn--ghost" type="button" data-close-panel>Keep shopping</button>
+      <button class="btn btn--gold" id="checkout-button" type="button">Checkout</button>
+    </div>
+  </div>
+</aside>
+
+<div id="toast-region" class="toast-region" aria-live="polite" aria-atomic="true"></div>
+
+<script type="module">
+import {
+  addToCart,
+  clearCart,
+  closePanel,
+  formatMoney,
+  getCartState,
+  getCurrentProfile,
+  getCurrentUser,
+  getModalElements,
+  getMenuItem,
+  loadTruckSchedule,
+  openItemModal,
+  openPanel,
+  renderCartDrawer,
+  renderFaq,
+  renderMenuList,
+  renderReviews,
+  renderSpecialCard,
+  renderTruckMap,
+  renderTruckStatusSection,
+  sb,
+  setCartItemQuantity,
+  setLoadingState,
+  removeCartItem,
+  showToast,
+  subscribeCart,
+  escapeHtml
+} from './app.js';
+
+const siteHeader = document.getElementById('site-header');
+const navToggle = document.getElementById('nav-toggle');
+const siteLinks = document.getElementById('site-links');
+const authArea = document.getElementById('auth-area');
+const cartButton = document.getElementById('cart-button');
+const cartCount = document.getElementById('cart-count');
+const cartDrawer = document.getElementById('cart-drawer');
+const cartDrawerBody = document.getElementById('cart-drawer-body');
+const itemModal = document.getElementById('item-modal');
+const checkoutModal = document.getElementById('checkout-modal');
+const bookingCard = document.getElementById('booking-card');
+const truckStatus = document.getElementById('truck-status');
+const truckMap = document.getElementById('truck-map');
+
+let currentUser = null;
+let currentProfile = null;
+let currentTruck = null;
+
+function setHeaderState() {
+  const open = siteHeader.classList.toggle('is-open');
+  navToggle.setAttribute('aria-expanded', String(open));
+}
+
+navToggle.addEventListener('click', () => setHeaderState());
+siteLinks.querySelectorAll('a').forEach((link) => {
+  link.addEventListener('click', () => {
+    if (window.matchMedia('(max-width: 760px)').matches) {
+      siteHeader.classList.remove('is-open');
+      navToggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+});
+
+document.addEventListener('click', (event) => {
+  const closeTarget = event.target.closest?.('[data-close-panel]');
+  if (closeTarget) {
+    closePanel(closeTarget.closest('.modal, .drawer'));
+  }
+});
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') {
+    closePanel(itemModal);
+    closePanel(checkoutModal);
+    closePanel(cartDrawer);
+  }
+});
+
+function updateAuthArea(user, profile) {
+  if (!user) {
+    authArea.innerHTML = '<a class="btn btn--gold" href="login.html">Login</a>';
+    return;
+  }
+
+  authArea.innerHTML = `
+    <a class="btn btn--ghost" href="dashboard.html">Dashboard</a>
+    <button class="btn btn--gold" id="logout-button" type="button">Logout</button>
+  `;
+  document.getElementById('logout-button').addEventListener('click', async () => {
+    if (sb) {
+      await sb.auth.signOut();
+    }
+    currentUser = null;
+    currentProfile = null;
+    updateAuthArea(null, null);
+    renderBookingShell();
+    showToast('You have been logged out.', 'neutral');
+  });
+}
+
+function renderBookingShell() {
+  if (!currentUser) {
+    bookingCard.innerHTML = `
+      <div class="auth-helper">
+        <div class="eyebrow">Booking access</div>
+        <h3>Log in to request a booking</h3>
+        <p>You’re seeing a clear call to action instead of a dead form. Once signed in, the full booking request form appears here.</p>
+        <div class="auth-actions">
+          <a class="btn btn--gold" href="login.html?next=index.html%23book">Login</a>
+          <a class="btn btn--ghost" href="login.html?signup=1&next=index.html%23book">Create Account</a>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  bookingCard.innerHTML = `
+    <form id="booking-form" class="field-grid" novalidate>
+      <div class="eyebrow">Request a booking</div>
+      <div>
+        <label class="field-label" for="booking-date">Event date</label>
+        <input class="field" id="booking-date" name="event_date" type="date" required>
+      </div>
+      <div>
+        <label class="field-label" for="booking-time">Event time</label>
+        <input class="field" id="booking-time" name="event_time" type="time" required>
+      </div>
+      <div>
+        <label class="field-label" for="booking-guests">Guest count</label>
+        <input class="field" id="booking-guests" name="guest_count" type="number" min="1" max="500" placeholder="e.g. 75" required>
+      </div>
+      <div>
+        <label class="field-label" for="booking-type">Event type</label>
+        <select class="select" id="booking-type" name="event_type" required>
+          <option value="">Select one</option>
+          <option>Private party</option>
+          <option>Corporate lunch</option>
+          <option>Wedding</option>
+          <option>Festival</option>
+          <option>Neighborhood stop</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div>
+        <label class="field-label" for="booking-location">Location</label>
+        <input class="field" id="booking-location" name="location" type="text" placeholder="Address or venue name" required>
+      </div>
+      <div>
+        <label class="field-label" for="booking-details">Details</label>
+        <textarea class="textarea" id="booking-details" name="details" placeholder="Gate code, service notes, timeline, anything helpful" required></textarea>
+      </div>
+      <button class="btn btn--gold btn--block" id="booking-submit" type="submit">Send Request</button>
+      <div id="booking-message" class="inline-note" aria-live="polite"></div>
+    </form>
+  `;
+
+  const form = document.getElementById('booking-form');
+  const message = document.getElementById('booking-message');
+  const submit = document.getElementById('booking-submit');
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    message.textContent = '';
+    message.className = 'inline-note';
+
+    const formData = new FormData(form);
+    const payload = Object.fromEntries(formData.entries());
+    const requiredFields = ['event_date', 'event_time', 'guest_count', 'event_type', 'location', 'details'];
+    const missing = requiredFields.filter((field) => !String(payload[field] || '').trim());
+    if (missing.length) {
+      message.textContent = 'Please complete all required fields before submitting.';
+      message.classList.add('alert', 'alert--error');
+      return;
+    }
+
+    submit.disabled = true;
+    submit.textContent = 'Submitting...';
+
+    try {
+      const { error } = await sb.from('booking_requests').insert({
+        user_id: currentUser.id,
+        event_date: payload.event_date,
+        event_time: payload.event_time,
+        guest_count: Number(payload.guest_count),
+        event_type: payload.event_type,
+        location: payload.location,
+        details: payload.details,
+        status: 'pending',
+      });
+      if (error) throw error;
+
+      form.reset();
+      message.textContent = 'Booking request sent. Check your dashboard for the latest status updates.';
+      message.classList.add('alert', 'alert--success');
+      showToast('Booking request submitted successfully.');
+    } catch (error) {
+      message.textContent = error.message || 'Unable to submit your booking request right now.';
+      message.classList.add('alert', 'alert--error');
+      showToast('Booking submission failed.', 'error');
+    } finally {
+      submit.disabled = false;
+      submit.textContent = 'Send Request';
+    }
+  });
+}
+
+function openCartDrawer() {
+  renderCartDrawer(cartDrawerBody);
+  openPanel(cartDrawer);
+}
+
+function renderCheckoutModal() {
+  const cart = getCartState();
+  if (!currentUser) {
+    showToast('Please log in before checking out.', 'neutral');
+    window.location.href = 'login.html?next=index.html%23menu';
+    return;
+  }
+
+  if (!cart.items.length) {
+    showToast('Your cart is empty.', 'neutral');
+    return;
+  }
+
+  const summaryRows = cart.items.map((item) => `
+    <div class="summary-line">
+      <span>${escapeHtml(item.name)} × ${item.quantity}</span>
+      <strong>${formatMoney(item.lineTotal)}</strong>
+    </div>
+  `).join('');
+
+  document.getElementById('checkout-modal-body').innerHTML = `
+    <div class="checkout-summary">
+      <p class="muted">Review your order before we save it to Supabase. Checkout creates a persistent order record and clears the cart once confirmed.</p>
+      <div class="summary-list">
+        ${summaryRows}
+      </div>
+      <div class="summary-line">
+        <span>Subtotal</span>
+        <strong>${formatMoney(cart.subtotal)}</strong>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn--ghost" type="button" data-close-panel>Cancel</button>
+        <button class="btn btn--gold" id="confirm-order-button" type="button">Place Order</button>
+      </div>
+    </div>
+  `;
+
+  openPanel(checkoutModal);
+
+  document.getElementById('confirm-order-button').addEventListener('click', async () => {
+    const orderButton = document.getElementById('confirm-order-button');
+    orderButton.disabled = true;
+    orderButton.textContent = 'Saving...';
+    try {
+      const payload = getCartState();
+      const { error } = await sb.from('orders').insert({
+        user_id: currentUser.id,
+        items: payload.items.map((item) => ({
+          id: item.id,
+          name: item.name,
+          category: item.category,
+          price: item.price,
+          quantity: item.quantity,
+        })),
+        subtotal: payload.subtotal,
+        total: payload.total,
+        item_count: payload.count,
+        status: 'pending',
+      });
+      if (error) throw error;
+
+      clearCart();
+      closePanel(cartDrawer);
+      showToast('Order confirmed and saved to your account.');
+      document.getElementById('checkout-modal-body').innerHTML = `
+        <div class="empty-state">
+          <h3>Order placed</h3>
+          <p>Your order is now in Supabase. You can review it from your dashboard anytime.</p>
+          <div class="auth-actions">
+            <a class="btn btn--gold" href="dashboard.html">Go to Dashboard</a>
+            <button class="btn btn--ghost" type="button" id="close-checkout-success">Close</button>
+          </div>
+        </div>
+      `;
+      openPanel(checkoutModal);
+      document.getElementById('close-checkout-success').addEventListener('click', () => closePanel(checkoutModal), { once: true });
+    } catch (error) {
+      showToast(error.message || 'Could not place the order.', 'error');
+      orderButton.disabled = false;
+      orderButton.textContent = 'Place Order';
+    }
+  }, { once: true });
+}
+
+cartButton.addEventListener('click', openCartDrawer);
+document.getElementById('open-cart-hero').addEventListener('click', openCartDrawer);
+
+document.body.addEventListener('click', (event) => {
+  const menuButton = event.target.closest?.('[data-menu-item]');
+  if (menuButton) {
+    openItemModal(getMenuItem(menuButton.dataset.menuItem));
+    bindItemModalEvents();
+  }
+
+  const specialButton = event.target.closest?.('[data-special-item]');
+  if (specialButton) {
+    openItemModal(getMenuItem(specialButton.dataset.specialItem));
+    bindItemModalEvents();
+  }
+
+  const addButton = event.target.closest?.('[data-add-to-cart]');
+  if (addButton) {
+    const qtyInput = document.querySelector('#item-modal [data-modal-qty]');
+    const quantity = Math.max(1, Number(qtyInput?.value || 1));
+    addToCart(addButton.dataset.addToCart, quantity);
+    closePanel(itemModal);
+    showToast('Added to your order.');
+  }
+});
+
+function bindItemModalEvents() {
+  const quantityInput = document.querySelector('#item-modal [data-modal-qty]');
+  const minusButton = document.querySelector('#item-modal [data-qty-minus]');
+  const plusButton = document.querySelector('#item-modal [data-qty-plus]');
+  if (!quantityInput || !minusButton || !plusButton) {
+    return;
+  }
+
+  minusButton.onclick = () => {
+    quantityInput.value = String(Math.max(1, Number(quantityInput.value || 1) - 1));
+  };
+  plusButton.onclick = () => {
+    quantityInput.value = String(Math.max(1, Number(quantityInput.value || 1) + 1));
+  };
+}
+
+cartDrawerBody.addEventListener('click', (event) => {
+  const itemRow = event.target.closest?.('[data-cart-item]');
+  if (!itemRow) return;
+  const itemId = itemRow.dataset.cartItem;
+  const qtyInput = itemRow.querySelector('[data-cart-qty]');
+  const currentQty = Math.max(1, Number(qtyInput?.value || 1));
+
+  if (event.target.closest('[data-cart-increment]')) {
+    setCartItemQuantity(itemId, currentQty + 1);
+    renderCartDrawer(cartDrawerBody);
+  }
+
+  if (event.target.closest('[data-cart-decrement]')) {
+    setCartItemQuantity(itemId, Math.max(1, currentQty - 1));
+    renderCartDrawer(cartDrawerBody);
+  }
+
+  if (event.target.closest('[data-cart-remove]')) {
+    removeCartItem(itemId);
+    showToast('Item removed from cart.', 'neutral');
+  }
+});
+
+cartDrawerBody.addEventListener('change', (event) => {
+  const input = event.target.closest?.('[data-cart-qty]');
+  if (!input) return;
+  const itemRow = input.closest('[data-cart-item]');
+  if (!itemRow) return;
+  setCartItemQuantity(itemRow.dataset.cartItem, Math.max(1, Number(input.value || 1)));
+  renderCartDrawer(cartDrawerBody);
+});
+
+document.getElementById('checkout-button').addEventListener('click', renderCheckoutModal);
+
+window.addEventListener('cow:cart-change', (event) => {
+  const cart = event.detail || getCartState();
+  cartCount.textContent = String(cart.count);
+  renderCartDrawer(cartDrawerBody);
+});
+
+async function initializeHome() {
+  setLoadingState(truckStatus, 'Loading truck schedule...');
+  setLoadingState(truckMap, 'Loading map...');
+  renderMenuList(document.getElementById('menu-list'), (item) => {
+    if (item) {
+      openItemModal(item);
+      bindItemModalEvents();
+    }
+  });
+  renderSpecialCard(document.getElementById('special-card'), (item) => {
+    if (item) {
+      openItemModal(item);
+      bindItemModalEvents();
+    }
+  });
+  renderFaq(document.getElementById('faq-list'));
+
+  const scheduleData = await loadTruckSchedule().catch((error) => {
+    showToast(error.message || 'Unable to load truck schedule.', 'error');
+    return { today: null, upcoming: [], reviews: [] };
+  });
+  currentTruck = scheduleData.today;
+  renderTruckStatusSection(truckStatus, scheduleData);
+  renderTruckMap(truckMap, scheduleData.today);
+  renderReviews(document.getElementById('reviews-list'), scheduleData.reviews || []);
+}
+
+async function initializeAuth() {
+  if (!sb) {
+    renderBookingShell();
+    showToast('Supabase is not configured in public/config.js.', 'error');
+    return;
+  }
+
+  try {
+    currentUser = await getCurrentUser();
+    if (currentUser) {
+      currentProfile = await getCurrentProfile(currentUser.id);
+    }
+  } catch (error) {
+    showToast(error.message || 'Unable to read your account.', 'error');
+  }
+
+  updateAuthArea(currentUser, currentProfile);
+  renderBookingShell();
+}
+
+subscribeCart((cart) => {
+  cartCount.textContent = String(cart.count);
+  renderCartDrawer(cartDrawerBody);
+});
+
+await initializeHome();
+await initializeAuth();
+
+</script>
+</body>
+</html>

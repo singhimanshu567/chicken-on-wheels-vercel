@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin — Chicken on Wheels</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<header class="site-header" id="site-header">
+  <div class="wrap">
+    <nav class="site-nav" aria-label="Primary">
+      <a class="brand" href="index.html">
+        <span class="brand-mark" aria-hidden="true"></span>
+        Chicken on Wheels
+      </a>
+      <button class="btn btn--ghost nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="site-links">Menu</button>
+      <div class="site-nav-links" id="site-links">
+        <a href="index.html#menu">Menu</a>
+        <a href="index.html#truck">Our Truck</a>
+        <a href="index.html#book">Book</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="index.html#faq">FAQ</a>
+      </div>
+      <div class="nav-actions">
+        <a class="btn btn--ghost" href="dashboard.html">My Dashboard</a>
+        <button class="btn btn--gold" id="logout-button" type="button">Logout</button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main class="page-section">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">Admin</div>
+        <h1 class="section-title">Admin <span>Console</span></h1>
+      </div>
+      <p class="section-copy">Review booking requests and customer orders from one place.</p>
+    </div>
+    <section class="dashboard-card">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">Bookings</div>
+          <h2 class="section-title">Booking <span>Requests</span></h2>
+        </div>
+      </div>
+      <div id="admin-list"></div>
+    </section>
+    <section class="dashboard-card" style="margin-top: 2rem">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">Sales</div>
+          <h2 class="section-title">Customer <span>Orders</span></h2>
+        </div>
+      </div>
+      <div id="admin-orders"></div>
+    </section>
+  </div>
+</main>
+
+<footer class="page-footer">
+  <div class="wrap footer-grid">
+    <div>
+      <a class="brand" href="index.html">
+        <span class="brand-mark" aria-hidden="true"></span>
+        Chicken on Wheels
+      </a>
+      <p class="footer-meta">Admin tools for handling booking requests and customer notes.</p>
+    </div>
+    <nav class="footer-links">
+      <a href="index.html#menu">Menu</a>
+      <a href="index.html#truck">Our Truck</a>
+      <a href="index.html#book">Book</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="index.html#faq">FAQ</a>
+    </nav>
+    <div class="footer-links">
+      <span class="muted">© 2026 Chicken on Wheels</span>
+    </div>
+  </div>
+</footer>
+
+<div id="toast-region" class="toast-region" aria-live="polite" aria-atomic="true"></div>
+
+<script type="module">
+import { getCurrentProfile, getCurrentUser, normalizeStatus, sb, setLoadingState, showToast, escapeHtml, statusMeta } from './app.js';
+
+const siteHeader = document.getElementById('site-header');
+const navToggle = document.getElementById('nav-toggle');
+const siteLinks = document.getElementById('site-links');
+const logoutButton = document.getElementById('logout-button');
+const list = document.getElementById('admin-list');
+const ordersList = document.getElementById('admin-orders');
+
+navToggle.addEventListener('click', () => {
+  const open = siteHeader.classList.toggle('is-open');
+  navToggle.setAttribute('aria-expanded', String(open));
+});
+
+siteLinks.querySelectorAll('a').forEach((link) => {
+  link.addEventListener('click', () => {
+    if (window.matchMedia('(max-width: 760px)').matches) {
+      siteHeader.classList.remove('is-open');
+      navToggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+});
+
+const user = await getCurrentUser().catch(() => null);
+if (!user) {
+  window.location.href = 'admin-login.html';
+} else {
+  const profile = await getCurrentProfile(user.id).catch(() => null);
+  if (profile?.role !== 'admin') {
+    list.innerHTML = '<div class="empty-state"><h3>Access denied</h3><p>This account is not allowed to manage requests.</p></div>';
+  } else {
+    await loadRequests();
+  }
+
+  logoutButton.addEventListener('click', async () => {
+    if (sb) {
+      await sb.auth.signOut();
+    }
+    window.location.href = 'index.html';
+  });
+
+  async function loadRequests() {
+    setLoadingState(list, 'Loading booking requests...');
+    setLoadingState(ordersList, 'Loading customer orders...');
+    const [{ data, error }, { data: orders, error: ordersError }, { data: profiles, error: profilesError }] = await Promise.all([
+      sb.from('booking_requests').select('*').order('created_at', { ascending: false }),
+      sb.from('orders').select('*').order('created_at', { ascending: false }),
+      sb.from('profiles').select('id,name,email'),
+    ]);
+
+    if (error) {
+      list.innerHTML = `<div class="empty-state"><h3>Could not load requests</h3><p>${escapeHtml(error.message)}</p></div>`;
+    }
+    if (profilesError) {
+      list.innerHTML = `<div class="empty-state"><h3>Customer details unavailable</h3><p>${escapeHtml(profilesError.message)}</p></div>`;
+    }
+
+    if (!ordersError) {
+      const profileById = Object.fromEntries((profiles || []).map((profile) => [profile.id, profile]));
+
+      if (!orders.length) {
+        ordersList.innerHTML = '<div class="empty-state"><h3>No orders yet</h3><p>Customer orders will appear here after checkout.</p></div>';
+      } else {
+        ordersList.innerHTML = `
+          <div class="accordion">
+            ${orders.map((order) => {
+              const customer = profileById[order.user_id];
+              const items = Array.isArray(order.items) ? order.items : [];
+              return `
+                <article class="booking-card">
+                  <div class="booking-card-top">
+                    <div>
+                      <div class="eyebrow">${escapeHtml(customer?.name || 'Customer')}</div>
+                      <h3>${escapeHtml(customer?.email || '')}</h3>
+                    </div>
+                    <span class="status-pill status-pill--${statusMeta[normalizeStatus(order.status)]?.tone || 'review'}">${escapeHtml(statusMeta[normalizeStatus(order.status)]?.label || order.status)}</span>
+                  </div>
+                  <p><strong>Order:</strong> #${escapeHtml(order.id)} · <strong>Total:</strong> ₹${escapeHtml(Number(order.total || 0).toFixed(2))}</p>
+                  <p><strong>Items:</strong> ${escapeHtml(items.map((item) => `${item.name || 'Item'} × ${item.quantity || 1}`).join(', ') || 'No items listed')}</p>
+                  ${order.customer_note ? `<p class="muted">${escapeHtml(order.customer_note)}</p>` : ''}
+                </article>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+    } else if (ordersError) {
+      ordersList.innerHTML = `<div class="empty-state"><h3>Could not load orders</h3><p>${escapeHtml(ordersError.message)}</p></div>`;
+    } else {
+      ordersList.innerHTML = `<div class="empty-state"><h3>Could not load orders</h3><p>${escapeHtml(ordersError.message)}</p></div>`;
+    }
+
+    if (error) {
+      return;
+    }
+
+    if (!data.length) {
+      list.innerHTML = '<div class="empty-state"><h3>No requests yet</h3><p>Booking requests will appear here once users submit them.</p></div>';
+      return;
+    }
+
+    const profileById = Object.fromEntries((profiles || []).map((profile) => [profile.id, profile]));
+    list.innerHTML = `
+      <div class="accordion">
+        ${data.map((request) => {
+          const userProfile = profileById[request.user_id];
+          return `
+            <article class="booking-card" data-request-id="${request.id}">
+              <div class="booking-card-top">
+                <div>
+                  <div class="eyebrow">${escapeHtml(userProfile?.name || 'Customer')}</div>
+                  <h3>${escapeHtml(userProfile?.email || '')}</h3>
+                </div>
+                <span class="status-pill status-pill--${statusMeta[normalizeStatus(request.status)]?.tone || 'review'}">${escapeHtml(statusMeta[normalizeStatus(request.status)]?.label || request.status)}</span>
+              </div>
+              <p><strong>Date:</strong> ${escapeHtml(request.event_date)} ${request.event_time ? `· ${escapeHtml(request.event_time)}` : ''}</p>
+              <p><strong>Guest count:</strong> ${escapeHtml(request.guest_count || '—')} · <strong>Type:</strong> ${escapeHtml(request.event_type || '—')}</p>
+              <p><strong>Location:</strong> ${escapeHtml(request.location)}</p>
+              <p class="muted">${escapeHtml(request.details || 'No additional details provided.')}</p>
+              <div class="field-grid">
+                <div>
+                  <label class="field-label" for="status-${request.id}">Status</label>
+                  <select class="select" id="status-${request.id}" data-status-select>
+                    ${Object.entries(statusMeta).map(([value, meta]) => `<option value="${value}" ${(value === normalizeStatus(request.status)) ? 'selected' : ''}>${escapeHtml(meta.label)}</option>`).join('')}
+                  </select>
+                </div>
+                <div>
+                  <label class="field-label" for="note-${request.id}">Admin note</label>
+                  <textarea class="textarea" id="note-${request.id}" data-admin-note>${escapeHtml(request.admin_note || '')}</textarea>
+                </div>
+              </div>
+              <div class="auth-actions">
+                <button class="btn btn--gold" type="button" data-save-request>Save changes</button>
+              </div>
+            </article>
+          `;
+        }).join('')}
+      </div>
+    `;
+
+    list.querySelectorAll('[data-save-request]').forEach((button) => {
+      button.addEventListener('click', async () => {
+        const requestCard = button.closest('[data-request-id]');
+        const requestId = requestCard.dataset.requestId;
+        const status = requestCard.querySelector('[data-status-select]').value;
+        const note = requestCard.querySelector('[data-admin-note]').value.trim();
+        button.disabled = true;
+        button.textContent = 'Saving...';
+        try {
+          const { error } = await sb.from('booking_requests').update({
+            status,
+            admin_note: note,
+            updated_at: new Date().toISOString(),
+          }).eq('id', requestId);
+          if (error) throw error;
+          showToast('Booking request updated.');
+          await loadRequests();
+        } catch (error) {
+          showToast(error.message || 'Could not update the request.', 'error');
+        } finally {
+          button.disabled = false;
+          button.textContent = 'Save changes';
+        }
+      });
+    });
+  }
+}
+</script>
+</body>
+</html>

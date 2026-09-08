@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dashboard — Chicken on Wheels</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<header class="site-header" id="site-header">
+  <div class="wrap">
+    <nav class="site-nav" aria-label="Primary">
+      <a class="brand" href="index.html">
+        <span class="brand-mark" aria-hidden="true"></span>
+        Chicken on Wheels
+      </a>
+      <button class="btn btn--ghost nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="site-links">Menu</button>
+      <div class="site-nav-links" id="site-links">
+        <a href="index.html#menu">Menu</a>
+        <a href="index.html#truck">Our Truck</a>
+        <a href="index.html#book">Book</a>
+        <a href="dashboard.html" aria-current="page">Dashboard</a>
+        <a href="index.html#faq">FAQ</a>
+      </div>
+      <div class="nav-actions">
+        <a class="btn btn--ghost" href="index.html">Website</a>
+        <button class="btn btn--gold" id="logout-button" type="button">Logout</button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main class="page-section">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">Account</div>
+        <h1 class="section-title">My <span>Dashboard</span></h1>
+      </div>
+      <p class="section-copy">A production-style account center for bookings, orders, statuses, and account details.</p>
+    </div>
+
+    <div id="dashboard-overview" class="loading-overlay"></div>
+
+    <div class="two-col-grid" style="margin-top:28px">
+      <section class="dashboard-card">
+        <div class="section-head section-head--compact">
+          <div>
+            <div class="eyebrow">Bookings</div>
+            <h2>Upcoming requests</h2>
+          </div>
+        </div>
+        <div id="booking-history" class="loading-overlay"></div>
+      </section>
+      <section class="dashboard-card">
+        <div class="section-head section-head--compact">
+          <div>
+            <div class="eyebrow">Orders</div>
+            <h2>Recent orders</h2>
+          </div>
+        </div>
+        <div id="order-history" class="loading-overlay"></div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<footer class="page-footer">
+  <div class="wrap footer-grid">
+    <div>
+      <a class="brand" href="index.html">
+        <span class="brand-mark" aria-hidden="true"></span>
+        Chicken on Wheels
+      </a>
+      <p class="footer-meta">Keep track of your requests and order history from one place.</p>
+    </div>
+    <nav class="footer-links" aria-label="Footer">
+      <a href="index.html#menu">Menu</a>
+      <a href="index.html#truck">Our Truck</a>
+      <a href="index.html#book">Book</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="index.html#faq">FAQ</a>
+    </nav>
+    <div class="footer-links">
+      <span class="muted">© 2026 Chicken on Wheels</span>
+    </div>
+  </div>
+</footer>
+
+<div id="toast-region" class="toast-region" aria-live="polite" aria-atomic="true"></div>
+
+<script type="module">
+import {
+  getCurrentProfile,
+  getCurrentUser,
+  loadDashboardData,
+  renderBookingHistory,
+  renderDashboardCards,
+  renderOrdersList,
+  sb,
+  setLoadingState,
+  showToast
+} from './app.js';
+
+const siteHeader = document.getElementById('site-header');
+const navToggle = document.getElementById('nav-toggle');
+const siteLinks = document.getElementById('site-links');
+const logoutButton = document.getElementById('logout-button');
+const overview = document.getElementById('dashboard-overview');
+const bookingHistory = document.getElementById('booking-history');
+const orderHistory = document.getElementById('order-history');
+
+navToggle.addEventListener('click', () => {
+  const open = siteHeader.classList.toggle('is-open');
+  navToggle.setAttribute('aria-expanded', String(open));
+});
+
+siteLinks.querySelectorAll('a').forEach((link) => {
+  link.addEventListener('click', () => {
+    if (window.matchMedia('(max-width: 760px)').matches) {
+      siteHeader.classList.remove('is-open');
+      navToggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+});
+
+const user = await getCurrentUser().catch(() => null);
+if (!user) {
+  window.location.href = 'login.html?next=dashboard.html';
+} else {
+  let profile = null;
+  try {
+    profile = await getCurrentProfile(user.id);
+  } catch (error) {
+    showToast(error.message || 'Could not load your profile.', 'error');
+  }
+
+  if (profile?.role === 'admin') {
+    const adminLink = document.createElement('a');
+    adminLink.className = 'btn btn--ghost';
+    adminLink.href = 'admin.html';
+    adminLink.textContent = 'Admin Panel';
+    logoutButton.insertAdjacentElement('beforebegin', adminLink);
+  }
+
+  logoutButton.addEventListener('click', async () => {
+    if (sb) {
+      await sb.auth.signOut();
+    }
+    window.location.href = 'index.html';
+  });
+
+  setLoadingState(overview, 'Loading dashboard...');
+  setLoadingState(bookingHistory, 'Loading bookings...');
+  setLoadingState(orderHistory, 'Loading orders...');
+
+  try {
+    const data = await loadDashboardData(user.id);
+    overview.classList.remove('loading-overlay');
+    bookingHistory.classList.remove('loading-overlay');
+    orderHistory.classList.remove('loading-overlay');
+    renderDashboardCards(overview, data);
+    renderBookingHistory(bookingHistory, data.bookings);
+    renderOrdersList(orderHistory, data.orders);
+  } catch (error) {
+    overview.classList.remove('loading-overlay');
+    bookingHistory.classList.remove('loading-overlay');
+    orderHistory.classList.remove('loading-overlay');
+    overview.innerHTML = `<div class="empty-state"><h3>Could not load dashboard</h3><p>${error.message || 'Please refresh and try again.'}</p></div>`;
+    bookingHistory.innerHTML = `<div class="empty-state"><h3>Bookings unavailable</h3><p>${error.message || 'Please refresh and try again.'}</p></div>`;
+    orderHistory.innerHTML = `<div class="empty-state"><h3>Orders unavailable</h3><p>${error.message || 'Please refresh and try again.'}</p></div>`;
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Login — Chicken on Wheels</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<main class="auth-shell">
+  <section class="auth-card">
+    <a class="brand" href="index.html" style="margin-bottom:20px;display:inline-flex;">
+      <span class="brand-mark" aria-hidden="true"></span>
+      Chicken on Wheels
+    </a>
+    <div class="eyebrow">Admin</div>
+    <h1>Admin login</h1>
+    <p>Sign in to manage booking requests and booking statuses.</p>
+    <form id="form" class="field-grid">
+      <div>
+        <label class="field-label" for="email">Admin email</label>
+        <input id="email" class="field" type="email" autocomplete="email" placeholder="admin@example.com" required>
+      </div>
+      <div>
+        <label class="field-label" for="password">Password</label>
+        <input id="password" class="field" type="password" autocomplete="current-password" required>
+      </div>
+      <button class="btn btn--gold btn--block" id="submit" type="submit">Login as admin</button>
+    </form>
+    <div class="auth-helper">
+      <div class="alert" id="msg" aria-live="polite">Only users with the admin role can continue.</div>
+      <div class="auth-actions" style="justify-content:flex-start">
+        <a class="btn btn--ghost" href="login.html">User login</a>
+        <a class="btn btn--ghost" href="index.html">Back to site</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script type="module">
+import { getCurrentProfile, sb, SUPABASE_CONFIGURED } from './app.js';
+
+const form = document.getElementById('form');
+const submit = document.getElementById('submit');
+const msg = document.getElementById('msg');
+
+if (!SUPABASE_CONFIGURED) {
+  msg.textContent = 'Admin login is not configured. Check public/config.js.';
+  submit.disabled = true;
+}
+
+form.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  if (!sb) {
+    msg.textContent = 'Admin login is not configured. Check public/config.js.';
+    return;
+  }
+
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+
+  submit.disabled = true;
+  submit.textContent = 'Checking access...';
+  msg.className = 'alert';
+  msg.textContent = 'Please wait...';
+
+  try {
+    const { error: loginError } = await sb.auth.signInWithPassword({ email, password });
+    if (loginError) throw loginError;
+
+    const { data: { user } } = await sb.auth.getUser();
+    const profile = await getCurrentProfile(user.id);
+    if (profile?.role !== 'admin') {
+      await sb.auth.signOut();
+      throw new Error('Access denied. This account is not an admin.');
+    }
+
+    window.location.href = 'admin.html';
+  } catch (error) {
+    msg.className = 'alert alert--error';
+    msg.textContent = error.message || 'Unable to connect to the login service.';
+  } finally {
+    submit.disabled = !SUPABASE_CONFIGURED;
+    submit.textContent = 'Login as admin';
+  }
+});
+</script>
+</body>
+</html>
